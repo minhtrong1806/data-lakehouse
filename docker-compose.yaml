@@ -1,0 +1,49 @@
+# services:
+#     minio:
+#         image: bitnami/minio:${MINIO_VERSION_TAG}
+#         container_name: minio
+#         ports:
+#           - 9000:9000
+#           - 9001:9001
+#         environment:
+#           MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+#           MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+#           MINIO_DOMAIN: ${MINIO_DOMAIN}
+#           MINIO_REGION_NAME: ${MINIO_REGION_NAME}
+#           MINIO_REGION: ${MINIO_REGION}
+#         volumes:
+#           - ./volumes/minio/:/bitnami/minio/data
+    
+#     nessie:
+#         image: ghcr.io/projectnessie/nessie:${NESSIE_VERSION_TAG}
+#         container_name: nessie
+#         ports:
+#           - "19120:19120"
+#         volumes:
+# #           - ./volumes/nessie:/var/lib/nessie
+
+services:
+  postgres:
+    image: postgres:latest
+    hostname: postgres
+    container_name: postgres
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=supply_chain
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./volumns/postgres_db:/var/lib/postgresql/data
+    networks:
+      - lakehouse
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d supply_chain -U admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  lakehouse:
+    driver: bridge
+
