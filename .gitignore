@@ -1,1 +1,4 @@
-./volumns
+.venv
+.env
+volumns
+tests
