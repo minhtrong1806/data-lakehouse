@@ -7,7 +7,8 @@ until (/usr/bin/mc alias set minio http://minio:9000 admin admin123); do
 done
 
 # Danh sách các bucket cần tạo
-BUCKETS=("warehouse" "datalake")
+# BUCKETS=("warehouse" "datalake")
+BUCKETS=("lakehouse")
 
 for BUCKET in "${BUCKETS[@]}"; do
     # Kiểm tra xem bucket đã tồn tại chưa
@@ -16,7 +17,7 @@ for BUCKET in "${BUCKETS[@]}"; do
     else
         echo "Tạo bucket '$BUCKET'..."
         /usr/bin/mc mb minio/$BUCKET
-        /usr/bin/mc policy set public minio/$BUCKET
+        /usr/bin/mc anonymous policy set public minio/$BUCKET
         echo "Bucket '$BUCKET' đã được tạo và đặt public."
     fi
 done

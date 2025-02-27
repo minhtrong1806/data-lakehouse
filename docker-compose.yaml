@@ -1,5 +1,106 @@
 services:
-  minio:
+  
+
+  supply-chain: # db suplly_chain
+    image: postgres
+    hostname: supply-chain
+    container_name: supply-chain
+    environment:
+      - POSTGRES_PASSWORD=admin123
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=supply_chain
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./volumns/supply_chain_db:/var/lib/postgresql/data
+      - ./conf/postgres/restore/:/backup/
+    networks:
+      - lakehouse
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d supply_chain -U admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  version-store: # version store for nessie
+    image: postgres
+    hostname: version-store
+    container_name: version-store
+    environment:
+      - POSTGRES_PASSWORD=admin123
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=catalog_nessie
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./volumns/catalog_nessie_db:/var/lib/postgresql/data
+    networks:
+      - lakehouse
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d catalog_nessie -U admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nessie: # catalog for iceberg
+    image: ghcr.io/projectnessie/nessie
+    container_name: nessie
+    hostname: nessie
+    environment:
+      - nessie.version.store.type=JDBC2
+      - nessie.version.store.persist.jdbc.datasource=postgresql
+      - quarkus.datasource.postgresql.jdbc.url=jdbc:postgresql://version-store:5432/catalog_nessie
+      - quarkus.datasource.postgresql.username=admin
+      - quarkus.datasource.postgresql.password=admin123
+      - nessie.catalog.default-warehouse=warehouse
+      - nessie.catalog.warehouses.warehouse.location=s3://lakehouse/
+      - nessie.catalog.service.s3.default-options.endpoint=http://minio:9000/
+      - nessie.catalog.service.s3.default-options.access-key=urn:nessie-secret:quarkus:nessie.catalog.secrets.access-key
+      - nessie.catalog.secrets.access-key.name=admin
+      - nessie.catalog.secrets.access-key.secret=admin123
+      - nessie.catalog.service.s3.default-options.region=us-east-1
+      - nessie.server.authentication.enabled=false
+    ports:
+      - "19120:19120"
+    networks:
+      - lakehouse
+    depends_on:
+      - version-store
+      - minio
+
+  trino: # query engine
+    image: 'trinodb/trino:latest'
+    container_name: trino
+    hostname: trino
+    environment:
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=admin123
+      - AWS_REGION=us-east-1
+    ports:
+      - '8060:8060'
+    volumes:
+      - ./trino/etc:/etc/trino
+      - ./volumns/trino/stage:/var/lib/ngods/stage
+    networks:
+      - lakehouse
+    depends_on:
+      - nessie
+
+  kafka:
+    image: bitnami/kafka
+    hostname: kafka
+    container_name: kafka
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    networks:
+      - lakehouse
+
+  minio: # Storage
       hostname: minio
       image: 'minio/minio'
       container_name: minio
@@ -19,8 +120,8 @@ services:
         interval: 5s
         timeout: 5s
         retries: 5
-
-  mc:
+  
+  mc: # minio client for creating default bucket 
     image: minio/mc
     container_name: mc
     hostname: mc
@@ -31,65 +132,13 @@ services:
     networks:
       - lakehouse
     volumes:
-      - ./scripts/init_minio.sh:/init_minio.sh 
+      - ./conf/minio/init_minio.sh:/init_minio.sh 
     entrypoint: ["/bin/sh", "-c", "/init_minio.sh"]
     depends_on:
       minio:
         condition: service_healthy
 
-  rest:
-    image: tabulario/iceberg-rest
-    container_name: iceberg-rest
-    hostname: rest
-    ports:
-      - 8181:8181
-    networks:
-      - lakehouse
-    environment:
-      - AWS_ACCESS_KEY_ID=admin
-      - AWS_SECRET_ACCESS_KEY=admin123
-      - AWS_REGION=us-east-1
-      - CATALOG_WAREHOUSE=s3://warehouse/
-      - CATALOG_IO__IMPL=org.apache.iceberg.aws.s3.S3FileIO
-      - CATALOG_S3_ENDPOINT=http://minio:9000
-    depends_on:
-      - minio
-
-  trino:
-    image: 'trinodb/trino:latest'
-    container_name: trino
-    hostname: trino
-    ports:
-      - '8060:8060'
-    volumes:
-      - ./trino/etc:/etc/trino
-    networks:
-      - lakehouse
-    depends_on:
-      - rest
-
-  postgres:
-    image: postgres
-    hostname: postgres
-    container_name: postgres
-    environment:
-      - POSTGRES_PASSWORD=admin123
-      - POSTGRES_USER=admin
-      - POSTGRES_DB=supply_chain
-    ports:
-      - '5432:5432'
-    volumes:
-      - ./volumns/postgres_db:/var/lib/postgresql/data
-      - ./scripts/restore_db/:/backup/
-    networks:
-      - lakehouse
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d supply_chain -U admin"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  cube:
+  cube: # semantic layer
     image: cubejs/cube
     container_name: cube
     hostname: cube
@@ -99,6 +148,20 @@ services:
       - 3000:3000 
       - 4000:4000
       - 3245:3245
+    networks:
+      - lakehouse
+  
+  metabase: # visualization
+    # image: metabase/metabase
+    container_name: metabase
+    hostname: metabase
+    depends_on:
+      - cube
+    build: metabase/
+    volumes:
+      - ./conf/metabase:/conf
+    ports:
+      - 3030:3030
     networks:
       - lakehouse
 
