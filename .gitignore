@@ -2,3 +2,4 @@
 .env
 volumns
 tests
+conf/cube/.cubestore/data
