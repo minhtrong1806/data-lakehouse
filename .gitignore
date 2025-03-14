@@ -5,3 +5,4 @@ cube/conf
 metabase/conf
 spark-iceberg/bin/*.tgz
 spark-iceberg/jars/*.jar
+src/logs
