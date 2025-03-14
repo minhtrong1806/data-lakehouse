@@ -1,5 +1,4 @@
 # DOCKER
-run-service: down up
 
 up:
 	docker compose up -d
