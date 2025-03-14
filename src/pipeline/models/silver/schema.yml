@@ -1,0 +1,162 @@
+version: 2
+
+models:
+  - name: processed_categories
+    description: "Bảng lưu thông tin danh mục sản phẩm"
+    columns:
+      - name: category_id
+        description: "Mã danh mục"
+        tests:
+          - unique
+          - not_null
+      - name: category_name
+        description: "Tên danh mục"
+
+  - name: processed_customers
+    description: "Thông tin khách hàng bao gồm danh tính, địa chỉ và thông tin liên hệ"
+    columns:
+      - name: customer_id
+        description: "Mã khách hàng"
+        tests:
+          - unique
+          - not_null
+      - name: customer_fname
+        description: "Tên khách hàng"
+      - name: customer_lname
+        description: "Họ khách hàng"
+      - name: customer_email
+        description: "Email khách hàng"
+        tests:
+          - unique
+      - name: customer_password
+        description: "Mật khẩu khách hàng (được mã hóa)"
+      - name: customer_street
+        description: "Địa chỉ đường phố của khách hàng"
+      - name: customer_city
+        description: "Thành phố của khách hàng"
+      - name: customer_state
+        description: "Bang/tỉnh của khách hàng"
+      - name: customer_zipcode
+        description: "Mã bưu chính của khách hàng"
+      - name: customer_country
+        description: "Quốc gia của khách hàng"
+
+  - name: processed_departments
+    description: "Bảng lưu thông tin phòng ban"
+    columns:
+      - name: department_id
+        description: "Mã phòng ban"
+        tests:
+          - unique
+          - not_null
+      - name: department_name
+        description: "Tên phòng ban"
+
+  - name: processed_stores
+    description: "Danh sách cửa hàng"
+    columns:
+      - name: store_id
+        description: "Mã cửa hàng"
+        tests:
+          - unique
+          - not_null
+      - name: store_name
+        description: "Tên cửa hàng"
+      - name: store_latitude
+        description: "Vĩ độ của cửa hàng"
+      - name: store_longitude
+        description: "Kinh độ của cửa hàng"
+
+  - name: processed_orders
+    description: "Thông tin đơn hàng"
+    columns:
+      - name: order_id
+        description: "Mã đơn hàng"
+        tests:
+          - unique
+          - not_null
+      - name: order_date
+        description: "Ngày đặt hàng"
+      - name: order_customer_id
+        description: "Mã khách hàng đặt hàng"
+      - name: store_id
+        description: "Mã cửa hàng thực hiện đơn hàng"
+      - name: order_status
+        description: "Trạng thái đơn hàng (COMPLETE , PENDING , CLOSED , PENDING_PAYMENT ,CANCELED , PROCESSING ,SUSPECTED_FRAUD ,ON_HOLD ,PAYMENT_REVIEW)"
+      - name: order_city
+        description: "Thành phố nơi đặt hàng"
+      - name: order_state
+        description: "Bang/tỉnh nơi đặt hàng"
+      - name: order_country
+        description: "Quốc gia nơi đặt hàng"
+      - name: order_region
+        description: "Khu vực địa lý của đơn hàng"
+      - name: order_market
+        description: "Thị trường nơi đơn hàng diễn ra (Africa , Europe , LATAM , Pacific Asia , USCA)"
+      - name: sales
+        description: "Tổng doanh thu của đơn hàng"
+      - name: payment_type
+        description: "Phương thức thanh toán"
+
+  - name: processed_products
+    description: "Thông tin sản phẩm"
+    columns:
+      - name: product_id
+        description: "Mã sản phẩm"
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: "Tên sản phẩm"
+      - name: product_description
+        description: "Mô tả chi tiết về sản phẩm"
+      - name: product_price
+        description: "Giá của gốc của sản phẩm"
+      - name: product_status
+        description: "Trạng thái sản phẩm 0 (còn hàng), 1 (hết hàng)"
+      - name: category_id
+        description: "Mã danh mục"
+      - name: product_image
+        description: "Đường dẫn hình ảnh sản phẩm"
+
+  - name: processed_shipping
+    description: "Thông tin vận chuyển"
+    columns:
+      - name: shipping_id
+        description: "Mã vận chuyển"
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Mã đơn hàng"
+      - name: shipping_date
+        description: "Ngày vận chuyển"
+      - name: shipping_mode
+        description: "Phương thức vận chuyển (Standard Class , First Class , Second Class , Same Day)"
+      - name: days_for_shipping_real
+        description: "Số ngày thực tế để vận chuyển"
+      - name: days_for_shipment_scheduled
+        description: "Số ngày dự kiến để vận chuyển"
+      - name: delivery_status
+        description: "Trạng thái giao hàng (Advance shipping, Late delivery, Shipping canceled, Shipping on time)"
+
+  - name: processed_order_items
+    description: "Chi tiết sản phẩm trong đơn hàng"
+    columns:
+      - name: order_item_id
+        description: "Mã chi tiết đơn hàng"
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Mã đơn hàng"
+      - name: product_id
+        description: "Mã sản phẩm"
+      - name: quantity
+        description: "Số lượng sản phẩm trong đơn hàng"
+      - name: unit_price
+        description: "Dơn vị giá của sản phẩm"
+      - name: discount
+        description: "Giá trị chiết khấu áp dụng cho sản phẩm"
+      - name: total_price
+        description: "Tổng giá trị đơn hàng sau khi áp dụng chiết khấu (quantity * unit_price - discount)"

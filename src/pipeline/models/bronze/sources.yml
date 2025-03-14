@@ -1,0 +1,141 @@
+version: 2
+
+sources:
+  - name: supply_chain
+    database: supply_chain  
+    schema: sc             
+    tables:
+      - name: categories
+        description: "Danh mục sản phẩm"
+        columns:
+          - name: category_id
+            description: "Mã danh mục"
+            tests:
+              - unique
+              - not_null
+          - name: category_name
+            description: "Tên danh mục"
+
+      - name: customers
+        description: "Thông tin khách hàng"
+        columns:
+          - name: customer_id
+            description: "Mã khách hàng"
+            tests:
+              - unique
+              - not_null
+          - name: customer_email
+            description: "Email khách hàng"
+            tests:
+              - unique
+          - name: customer_password
+            description: "Mật khẩu khách hàng (được mã hóa)"
+
+      - name: departments
+        description: "Phòng ban trong cửa hàng"
+        columns:
+          - name: department_id
+            description: "Mã phòng ban"
+            tests:
+              - unique
+              - not_null
+          - name: department_name
+            description: "Tên phòng ban"
+
+      - name: stores
+        description: "Danh sách cửa hàng"
+        columns:
+          - name: store_id
+            description: "Mã cửa hàng"
+            tests:
+              - unique
+              - not_null
+          - name: store_name
+            description: "Tên cửa hàng"
+
+      - name: orders
+        description: "Thông tin đơn hàng"
+        columns:
+          - name: order_id
+            description: "Mã đơn hàng"
+            tests:
+              - unique
+              - not_null
+          - name: order_customer_id
+            description: "Mã khách hàng đặt hàng"
+            tests:
+              - relationships:
+                  to: source('supply_chain', 'customers')
+                  field: customer_id
+          - name: store_id
+            description: "Mã cửa hàng"
+            tests:
+              - relationships:
+                  to: source('supply_chain', 'stores')
+                  field: store_id
+
+      - name: products
+        description: "Thông tin sản phẩm"
+        columns:
+          - name: product_id
+            description: "Mã sản phẩm"
+            tests:
+              - unique
+              - not_null
+          - name: category_id
+            description: "Mã danh mục"
+            tests:
+              - relationships:
+                  to: source('supply_chain', 'categories')
+                  field: category_id
+
+      - name: shipping
+        description: "Thông tin vận chuyển"
+        columns:
+          - name: shipping_id
+            description: "Mã vận chuyển"
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            description: "Mã đơn hàng"
+            tests:
+              - relationships:
+                  to: source('supply_chain', 'orders')
+                  field: order_id
+
+      - name: order_items
+        description: "Chi tiết sản phẩm trong đơn hàng"
+        columns:
+          - name: order_item_id
+            description: "Mã chi tiết đơn hàng"
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            description: "Mã đơn hàng"
+            tests:
+              - relationships:
+                  to: source('supply_chain', 'orders')
+                  field: order_id
+          - name: product_id
+            description: "Mã sản phẩm"
+            tests:
+              - relationships:
+                  to: source('supply_chain', 'products')
+                  field: product_id
+      - name: store_departments
+        description: "Quan hệ giữa cửa hàng và phòng ban"
+        columns:
+          - name: store_id
+            description: "Mã cửa hàng"
+            tests:
+              - relationships:
+                  to: source('supply_chain', 'stores')
+                  field: store_id
+          - name: department_id
+            description: "Mã phòng ban"
+            tests:
+              - relationships:
+                  to: source('supply_chain', 'departments')
+                  field: department_id

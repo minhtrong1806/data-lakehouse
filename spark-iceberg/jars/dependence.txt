@@ -1,0 +1,13 @@
+bundle-2.30.33.jar
+commons-p0012-2.11.1 jar
+hadoop-aws-3.4.Ojar
+hadoop-client-api-3.4.0.jar
+hadoop-cIient-runtime-3.4.Ojar
+hadoop-yarn-server-web-proxy-3.4.0.jar
+iceberg-spark-runtime-3.5_2.12-1.6.1 jar
+kafka-clients-3.9.0.jar
+postgresqI-42.7.3.jar
+slf4j-api-2.0.16.jar
+spark-sql-kafka-O-10_2.12-3.5.5jar
+spark-token-provider-kafka-0-10_2.12-3.5.5.jar
+url-connection-client-2.30.33.jar
