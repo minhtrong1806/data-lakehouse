@@ -15,7 +15,6 @@ extracted_data AS (
         ts,
         ip,
         url,
-        regexp_extract(url, '^/department/([^/]+)/category/([^/]+)/product/(.*)', 1) AS department,
         regexp_extract(url, '^/department/([^/]+)/category/([^/]+)/product/(.*)', 2) AS category,
         regexp_extract(url, '^/department/([^/]+)/category/([^/]+)/product/(.*)', 3) AS product
     FROM source
@@ -23,9 +22,8 @@ extracted_data AS (
 
 SELECT
     event_id, 
-    ts,
+    ts AS timestamp,
     ip, 
-    regexp_replace(department, '%20', ' ') AS department,
     regexp_replace(category, '%20', ' ') AS category,
     regexp_replace(product, '%20', ' ') AS product
 FROM extracted_data

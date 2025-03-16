@@ -24,12 +24,17 @@ clean-targets:
 
 models:
   pipeline:
+    +materialized: table
     bronze:
-      +materialized: table
-      +chema: bronze
+      +schema: bronze
     silver:
-      +materialized: table
       +schema: silver
     gold:
-      +materialized: table
       +schema: gold
+      dim_customer:
+        +post-hook: "{{ run_audit('silver_customers', 'dim_customer') }}"
+      dim_product:
+        +post-hook: "{{ run_audit('silver_products', 'dim_product') }}"
+      dim_store:
+        +post-hook: "{{ run_audit('silver_stores', 'dim_store') }}"
+

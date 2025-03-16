@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: processed_categories
+  - name: stg_categories
     description: "Bảng lưu thông tin danh mục sản phẩm"
     columns:
       - name: category_id
@@ -12,7 +12,7 @@ models:
       - name: category_name
         description: "Tên danh mục"
 
-  - name: processed_customers
+  - name: stg_customers
     description: "Thông tin khách hàng bao gồm danh tính, địa chỉ và thông tin liên hệ"
     columns:
       - name: customer_id
@@ -30,29 +30,12 @@ models:
           - unique
       - name: customer_password
         description: "Mật khẩu khách hàng (được mã hóa)"
-      - name: customer_street
-        description: "Địa chỉ đường phố của khách hàng"
-      - name: customer_city
-        description: "Thành phố của khách hàng"
-      - name: customer_state
-        description: "Bang/tỉnh của khách hàng"
-      - name: customer_zipcode
-        description: "Mã bưu chính của khách hàng"
-      - name: customer_country
-        description: "Quốc gia của khách hàng"
+      - name: sales_per_customer
+        description: "Doanh thu trên khách hàng"
+      - name: customer_segment
+        description: "Phân khúc khách hàng, được thêm sau"
 
-  - name: processed_departments
-    description: "Bảng lưu thông tin phòng ban"
-    columns:
-      - name: department_id
-        description: "Mã phòng ban"
-        tests:
-          - unique
-          - not_null
-      - name: department_name
-        description: "Tên phòng ban"
-
-  - name: processed_stores
+  - name: stg_stores
     description: "Danh sách cửa hàng"
     columns:
       - name: store_id
@@ -60,14 +43,22 @@ models:
         tests:
           - unique
           - not_null
-      - name: store_name
-        description: "Tên cửa hàng"
       - name: store_latitude
         description: "Vĩ độ của cửa hàng"
       - name: store_longitude
         description: "Kinh độ của cửa hàng"
+      - name: store_street
+        description: "Địa chỉ đường phố của cửa hàng"
+      - name: store_city
+        description: "Thành phố của của hàng"
+      - name: store_state
+        description: "Bang/tỉnh của của hàng"
+      - name: store_zipcode
+        description: "Mã bưu chính của cửa hàng"
+      - name: store_country
+        description: "Quốc gia của cửa hàng"
 
-  - name: processed_orders
+  - name: stg_orders
     description: "Thông tin đơn hàng"
     columns:
       - name: order_id
@@ -97,9 +88,13 @@ models:
         description: "Tổng doanh thu của đơn hàng"
       - name: payment_type
         description: "Phương thức thanh toán"
+      - name: profit_per_order
+        description: "Lợi nhuận thu được trên mỗi đơn hàng"
 
-  - name: processed_products
+  - name: stg_products
     description: "Thông tin sản phẩm"
+    config:
+      partition_by: ["order_id"]
     columns:
       - name: product_id
         description: "Mã sản phẩm"
@@ -108,8 +103,6 @@ models:
           - not_null
       - name: product_name
         description: "Tên sản phẩm"
-      - name: product_description
-        description: "Mô tả chi tiết về sản phẩm"
       - name: product_price
         description: "Giá của gốc của sản phẩm"
       - name: product_status
@@ -119,8 +112,10 @@ models:
       - name: product_image
         description: "Đường dẫn hình ảnh sản phẩm"
 
-  - name: processed_shipping
+  - name: stg_shipping
     description: "Thông tin vận chuyển"
+    config:
+      partition_by: ["order_id"]
     columns:
       - name: shipping_id
         description: "Mã vận chuyển"
@@ -139,9 +134,13 @@ models:
         description: "Số ngày dự kiến để vận chuyển"
       - name: delivery_status
         description: "Trạng thái giao hàng (Advance shipping, Late delivery, Shipping canceled, Shipping on time)"
+      - name: late_delivery_risk
+        description: "cho biết đơn hàng có bị giao trễ không 1 là có, 0 là không"
 
-  - name: processed_order_items
+  - name: stg_order_items
     description: "Chi tiết sản phẩm trong đơn hàng"
+    config:
+      partition_by: ["order_id"]
     columns:
       - name: order_item_id
         description: "Mã chi tiết đơn hàng"
@@ -160,3 +159,25 @@ models:
         description: "Giá trị chiết khấu áp dụng cho sản phẩm"
       - name: total_price
         description: "Tổng giá trị đơn hàng sau khi áp dụng chiết khấu (quantity * unit_price - discount)"
+      - name: profit_ratio
+        description: " Tỉ lệ lợi nhuận"
+  - name: stg_clickstream
+    description: "Thông tin về event click sản phẩm"
+    config:
+      partition_by: ["timestamp"]
+      cluster_by: ['product']
+    columns:
+      - name: event_id
+        description: "Mã event"
+        tests:
+          - unique
+          - not_null
+      - name: timestamp
+        description: "timestamp"
+      - name: ip
+        description: "Địa chỉ ip của client"
+      - name: category
+        description: "Phân loại sản phẩm được click"
+      - name: product
+        description: "Sản phẩm được click"
+      

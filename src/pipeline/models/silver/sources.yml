@@ -6,4 +6,4 @@ sources:
     schema: bronze            
     tables:
       - name: raw_clickstream
-        description: ""
+        description: "dữ liệu evrnt logs"

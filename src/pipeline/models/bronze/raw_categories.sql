@@ -1,12 +1,11 @@
-with source as (
-        select * from {{ source('supply_chain', 'categories') }}
+WITH source AS (
+      SELECT * FROM {{ source('supply_chain', 'categories') }}
   ),
-  renamed as (
-      select
+renamed AS (
+      SELECT
         {{ adapter.quote("category_id") }},
         {{ adapter.quote("category_name") }}
-
-      from source
+      FROM source
   )
-  select * from renamed
+  SELECT * FROM renamed
     
