@@ -1,8 +1,8 @@
-with source as (
-        select * from {{ source('supply_chain', 'products') }}
+with source AS (
+    SELECT * FROM {{ source('supply_chain', 'products') }}
   ),
-  renamed as (
-      select
+renamed AS (
+      SELECT
         {{ adapter.quote("product_id") }},
         {{ adapter.quote("product_name") }},
         {{ adapter.quote("product_description") }},
@@ -10,8 +10,7 @@ with source as (
         {{ adapter.quote("product_status") }},
         {{ adapter.quote("category_id") }},
         {{ adapter.quote("product_image") }}
-
-      from source
+      FROM source
   )
-  select * from renamed
+SELECT * FROM renamed
     

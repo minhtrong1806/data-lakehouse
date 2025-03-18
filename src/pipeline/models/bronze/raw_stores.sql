@@ -1,14 +1,17 @@
-with source as (
-        select * from {{ source('supply_chain', 'stores') }}
+with source AS (
+      SELECT * FROM {{ source('supply_chain', 'stores') }}
   ),
-  renamed as (
-      select
+  renamed AS (
+      SELECT
         {{ adapter.quote("store_id") }},
-        {{ adapter.quote("store_name") }},
         {{ adapter.quote("store_latitude") }},
-        {{ adapter.quote("store_longitude") }}
-
-      from source
+        {{ adapter.quote("store_longitude") }},
+        {{ adapter.quote("store_street") }},
+        {{ adapter.quote("store_city") }},
+        {{ adapter.quote("store_state") }},
+        {{ adapter.quote("store_zipcode") }},
+        {{ adapter.quote("store_country") }}
+      FROM source
   )
-  select * from renamed
+SELECT * FROM renamed
     

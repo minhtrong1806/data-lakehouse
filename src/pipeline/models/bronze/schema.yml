@@ -30,27 +30,7 @@ models:
           - unique
       - name: customer_password
         description: "Mật khẩu khách hàng (được mã hóa)"
-      - name: customer_street
-        description: "Địa chỉ đường phố của khách hàng"
-      - name: customer_city
-        description: "Thành phố của khách hàng"
-      - name: customer_state
-        description: "Bang/tỉnh của khách hàng"
-      - name: customer_zipcode
-        description: "Mã bưu chính của khách hàng"
-      - name: customer_country
-        description: "Quốc gia của khách hàng"
-
-  - name: raw_departments
-    description: "Bảng raw lưu thông tin phòng ban"
-    columns:
-      - name: department_id
-        description: "Mã phòng ban"
-        tests:
-          - unique
-          - not_null
-      - name: department_name
-        description: "Tên phòng ban"
+     
 
   - name: raw_stores
     description: "Danh sách cửa hàng"
@@ -60,15 +40,25 @@ models:
         tests:
           - unique
           - not_null
-      - name: store_name
-        description: "Tên cửa hàng"
       - name: store_latitude
         description: "Vĩ độ của cửa hàng"
       - name: store_longitude
         description: "Kinh độ của cửa hàng"
+      - name: store_street
+        description: "Địa chỉ đường phố của cửa hàng"
+      - name: store_city
+        description: "Thành phố của của hàng"
+      - name: store_state
+        description: "Bang/tỉnh của của hàng"
+      - name: store_zipcode
+        description: "Mã bưu chính của cửa hàng"
+      - name: store_country
+        description: "Quốc gia của cửa hàng"
 
   - name: raw_orders
     description: "Thông tin đơn hàng"
+    config:
+      partition_by: ["order_id"]
     columns:
       - name: order_id
         description: "Mã đơn hàng"
@@ -142,6 +132,8 @@ models:
 
   - name: raw_order_items
     description: "Chi tiết sản phẩm trong đơn hàng"
+    config:
+      partition_by: ["order_id"]
     columns:
       - name: order_item_id
         description: "Mã chi tiết đơn hàng"

@@ -31,17 +31,6 @@ sources:
           - name: customer_password
             description: "Mật khẩu khách hàng (được mã hóa)"
 
-      - name: departments
-        description: "Phòng ban trong cửa hàng"
-        columns:
-          - name: department_id
-            description: "Mã phòng ban"
-            tests:
-              - unique
-              - not_null
-          - name: department_name
-            description: "Tên phòng ban"
-
       - name: stores
         description: "Danh sách cửa hàng"
         columns:
@@ -50,8 +39,6 @@ sources:
             tests:
               - unique
               - not_null
-          - name: store_name
-            description: "Tên cửa hàng"
 
       - name: orders
         description: "Thông tin đơn hàng"
@@ -124,18 +111,3 @@ sources:
               - relationships:
                   to: source('supply_chain', 'products')
                   field: product_id
-      - name: store_departments
-        description: "Quan hệ giữa cửa hàng và phòng ban"
-        columns:
-          - name: store_id
-            description: "Mã cửa hàng"
-            tests:
-              - relationships:
-                  to: source('supply_chain', 'stores')
-                  field: store_id
-          - name: department_id
-            description: "Mã phòng ban"
-            tests:
-              - relationships:
-                  to: source('supply_chain', 'departments')
-                  field: department_id

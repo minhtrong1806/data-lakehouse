@@ -36,6 +36,7 @@ def read_from_kafka(spark, topic):
                 .format("kafka") \
                 .option("kafka.bootstrap.servers", "kafka:9092") \
                 .option("subscribe", topic) \
+                .option("failOnDataLoss", "false") \
                 .option("startingOffsets", "earliest") \
                 .load()
         except AnalysisException as e:
