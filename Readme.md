@@ -1,11 +1,15 @@
+### TỐI ƯU VẬN HÀNH CHUỖI CUNG ỨNG VỚI LAKEHOUSE PLATFORM
 
-#### Run container
-```command
-    make run
-```
+#### Architecture
 
-#### Restore supply chain database
-```command
-    make restore-db
-```
+![Architecture](./docs/data_lakehouse_architecture.png)
 
+#### Pipeline
+
+![pipeline](./docs/pipelines.png)
+
+#### Data source
+
+![Supply chain](./docs/supply_chain_schema.png)
+
+[source](https://data.mendeley.com/datasets/8gx2fvg2k6/5)
