@@ -31,10 +31,15 @@ models:
       +schema: silver
     gold:
       +schema: gold
+      dim_audit:
+        +materialized: incremental
+        +unique_key: audit_sk
       dim_customer:
-        +post-hook: "{{ run_audit('silver_customers', 'dim_customer') }}"
+        +post-hook: "{{ run_audit('stg_customers', 'dim_customer') }}"
       dim_product:
-        +post-hook: "{{ run_audit('silver_products', 'dim_product') }}"
+        +post-hook: "{{ run_audit('stg_products', 'dim_product') }}"
       dim_store:
-        +post-hook: "{{ run_audit('silver_stores', 'dim_store') }}"
+        +post-hook: "{{ run_audit('stg_stores', 'dim_store') }}"
+      customer_rfm: 
+        {+post-hook: "{{ run_audit('fact_sales', 'customer_rfm') }}"}
 
