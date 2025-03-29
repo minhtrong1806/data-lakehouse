@@ -7,9 +7,9 @@
         os.order_status_sk, sm.shipping_mode_sk, ds.delivery_status_sk, pt.payment_type_sk,
         oi.quantity, oi.unit_price, oi.discount, oi.total_price, o.sales, o.profit_per_order AS profit,
         s.days_for_shipping_real, s.days_for_shipment_scheduled, s.late_delivery_risk
-    FROM {{ ref('silver_orders') }} o
-    JOIN {{ ref('silver_order_items') }} oi ON o.order_id = oi.order_id
-    JOIN {{ ref('silver_shipping') }} s ON o.order_id = s.order_id
+    FROM {{ ref('stg_orders') }} o
+    JOIN {{ ref('stg_order_items') }} oi ON o.order_id = oi.order_id
+    JOIN {{ ref('stg_shipping') }} s ON o.order_id = s.order_id
     JOIN {{ ref('dim_product') }} p ON oi.product_id = p.product_id
         AND o.order_date BETWEEN p.effective_date AND COALESCE(p.expiration_date, DATE '9999-12-31')
     JOIN {{ ref('dim_customer') }} c ON o.customer_id = c.customer_id
@@ -29,9 +29,9 @@
         os.order_status_sk, sm.shipping_mode_sk, ds.delivery_status_sk, pt.payment_type_sk,
         oi.quantity, oi.unit_price, oi.discount, oi.total_price, o.sales, o.profit_per_order AS profit,
         s.days_for_shipping_real, s.days_for_shipment_scheduled, s.late_delivery_risk
-    FROM {{ ref('silver_orders') }} o
-    JOIN {{ ref('silver_order_items') }} oi ON o.order_id = oi.order_id
-    JOIN {{ ref('silver_shipping') }} s ON o.order_id = s.order_id
+    FROM {{ ref('stg_orders') }} o
+    JOIN {{ ref('stg_order_items') }} oi ON o.order_id = oi.order_id
+    JOIN {{ ref('stg_shipping') }} s ON o.order_id = s.order_id
     JOIN {{ ref('dim_product') }} p ON oi.product_id = p.product_id
         AND o.order_date BETWEEN p.effective_date AND COALESCE(p.expiration_date, DATE '9999-12-31')
     JOIN {{ ref('dim_customer') }} c ON o.customer_id = c.customer_id
