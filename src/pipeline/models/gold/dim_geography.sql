@@ -1,4 +1,3 @@
-{{ config(materialized='table') }}
 SELECT 
     ROW_NUMBER() OVER (ORDER BY geography_id) AS geography_sk,
     geography_id, city, state, country, region, market

@@ -1,76 +1,77 @@
-{% macro handle_scd_type2(source_table, target_table, natural_key, attributes) %}
+{% macro handle_scd_type2(source_table, target_table, natural_key, attributes, surrogate_key_name) %}
     {% if is_incremental() %}
-        -- Lấy dữ liệu từ source
         WITH source_data AS (
             SELECT 
-                {{ natural_key }} AS {{ natural_key }}, 
-                {% for attribute in attributes %}{{ attribute }},{% endfor %}
-                CURRENT_TIMESTAMP AS effective_date, 
-                CAST(NULL AS TIMESTAMP) AS expiration_date, 
+                {{ natural_key }},
+                {{ attributes | join(', ') }},
+                CAST('2015-01-01 00:00:00.000' AS timestamp(6)) AS effective_date,
+                CAST(NULL AS timestamp(6) with time zone) AS expiration_date,
                 1 AS is_current
             FROM {{ source_table }}
         ),
-        -- So sánh với dữ liệu hiện tại để phát hiện thay đổi
-        existing_data AS (
-            SELECT 
-                t.*, 
-                s.{{ natural_key }} AS source_{{ natural_key }}
-            FROM {{ this }} t
-            LEFT JOIN source_data s 
-                ON t.{{ natural_key }} = s.{{ natural_key }} 
-                AND t.is_current = 1
+        current_records AS (
+            SELECT
+                {{ surrogate_key_name }},
+                {{ natural_key }},
+                {{ attributes | join(', ') }},
+                effective_date,
+                expiration_date,
+                is_current
+            FROM {{ target_table }}
+            WHERE is_current = 1
         ),
-        -- Đóng bản ghi cũ nếu có thay đổi
-        close_old_records AS (
-            SELECT 
-                surrogate_key, 
-                e.{{ natural_key }} AS {{ natural_key }}, 
-                {% for attribute in attributes %}e.{{ attribute }},{% endfor %}
-                e.effective_date AS effective_date,
+        change_detection AS (
+            SELECT
+                s.{{ natural_key }},
+                c.{{ surrogate_key_name }},
                 CASE 
-                    WHEN source_{{ natural_key }} IS NOT NULL 
-                         AND ({% for attribute in attributes %}e.{{ attribute }} != s.{{ attribute }}{% if not loop.last %} OR {% endif %}{% endfor %})
-                    THEN CURRENT_TIMESTAMP - INTERVAL '1' SECOND
-                    ELSE CAST(e.expiration_date AS TIMESTAMP)
-                END AS expiration_date,
-                CASE 
-                    WHEN source_{{ natural_key }} IS NOT NULL 
-                         AND ({% for attribute in attributes %}e.{{ attribute }} != s.{{ attribute }}{% if not loop.last %} OR {% endif %}{% endfor %})
-                    THEN 0 
-                    ELSE e.is_current  -- Thêm alias e.
-                END AS is_current
-            FROM existing_data e
-            LEFT JOIN source_data s 
-                ON e.{{ natural_key }} = s.{{ natural_key }}
+                    WHEN c.{{ natural_key }} IS NULL THEN TRUE  -- Nếu không tìm thấy natural_key, tức là bản ghi mới
+                    WHEN (
+                        {% for attribute in attributes %}
+                            s.{{ attribute }} IS DISTINCT FROM c.{{ attribute }}{% if not loop.last %} OR {% endif %}
+                        {% endfor %}
+                    ) THEN TRUE  -- Nếu có bất kỳ sự thay đổi nào
+                    ELSE FALSE
+                END AS has_changed
+            FROM source_data s
+            LEFT JOIN current_records c ON s.{{ natural_key }} = c.{{ natural_key }}
         ),
-        -- Thêm bản ghi mới nếu có thay đổi
+        records_to_close AS (
+            SELECT
+                c.{{ surrogate_key_name }},
+                c.{{ natural_key }},
+                {{ attributes | join(', ') }},
+                c.effective_date,
+                CURRENT_TIMESTAMP(6) - INTERVAL '1' SECOND AS expiration_date,
+                0 AS is_current
+            FROM current_records c
+            JOIN change_detection cd ON c.{{ natural_key }} = cd.{{ natural_key }}
+            WHERE cd.has_changed = TRUE
+        ),
         new_records AS (
-            SELECT 
-                ROW_NUMBER() OVER (ORDER BY s.{{ natural_key }}) + (SELECT COALESCE(MAX(surrogate_key), 0) FROM {{ this }}) AS surrogate_key,
-                s.{{ natural_key }} AS {{ natural_key }}, 
-                {% for attribute in attributes %}s.{{ attribute }},{% endfor %}
-                s.effective_date AS effective_date,
-                CAST(NULL AS TIMESTAMP) AS expiration_date, 
+            SELECT
+                ROW_NUMBER() OVER (ORDER BY s.{{ natural_key }})
+                    + COALESCE((SELECT MAX(c.{{ surrogate_key_name }}) FROM current_records AS c), 0)
+                    AS {{ surrogate_key_name }},
+                s.{{ natural_key }},
+                {{ attributes | join(', ') }},
+                CURRENT_TIMESTAMP(6) AS effective_date,
+                CAST(NULL AS timestamp(6) with time zone) AS expiration_date,
                 1 AS is_current
             FROM source_data s
-            LEFT JOIN close_old_records e 
-                ON s.{{ natural_key }} = e.{{ natural_key }} 
-                AND e.is_current = 1
-            WHERE e.{{ natural_key }} IS NULL 
-               OR ({% for attribute in attributes %}s.{{ attribute }} != e.{{ attribute }}{% if not loop.last %} OR {% endif %}{% endfor %})
+            JOIN change_detection cd ON s.{{ natural_key }} = cd.{{ natural_key }}
+            WHERE cd.has_changed = TRUE
         )
-        -- Kết hợp bản ghi cũ đã cập nhật và bản ghi mới
-        SELECT * FROM close_old_records
+        SELECT * FROM records_to_close
         UNION ALL
         SELECT * FROM new_records
     {% else %}
-        -- Full load lần đầu tiên
         SELECT 
-            ROW_NUMBER() OVER (ORDER BY {{ natural_key }}) AS surrogate_key,
-            {{ natural_key }} AS {{ natural_key }}, 
-            {{ attributes | join(', ') }}, 
-            CURRENT_TIMESTAMP AS effective_date, 
-            CAST(NULL AS TIMESTAMP) AS expiration_date, 
+            ROW_NUMBER() OVER (ORDER BY {{ natural_key }}) AS {{ surrogate_key_name }},
+            {{ natural_key }},
+            {{ attributes | join(', ') }},
+            CAST('2015-01-01 00:00:00.000' AS timestamp(6)) AS effective_date,
+            CAST(NULL AS timestamp(6) with time zone) AS expiration_date,
             1 AS is_current
         FROM {{ source_table }}
     {% endif %}
