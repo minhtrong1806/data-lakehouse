@@ -159,32 +159,17 @@ services:
       minio:
         condition: service_healthy
 
-  # cube: # semantic layer
-  #   image: cubejs/cube
-  #   container_name: cube
-  #   hostname: cube
-  #   volumes:
-  #     - ./cube/conf:/cube/conf
-  #   ports:
-  #     - 3000:3000 
-  #     - 4000:4000
-  #     - 3245:3245
-  #   networks:
-  #     - lakehouse
-  
-  # metabase: # visualization
-  #   image: metabase
-  #   container_name: metabase
-  #   hostname: metabase
-  #   depends_on:
-  #     - cube
-  #   build: metabase/
-  #   volumes:
-  #     - ./metabase/conf:/conf
-  #   ports:
-  #     - 3030:3030
-  #   networks:
-  #     - lakehouse
+  metabase: # visualization
+    image: metabase
+    container_name: metabase
+    hostname: metabase
+    build: metabase/
+    volumes:
+      - ./metabase/conf:/conf
+    ports:
+      - 3030:3030
+    networks:
+      - lakehouse
 
 
 networks:

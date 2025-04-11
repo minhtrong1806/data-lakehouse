@@ -30,7 +30,7 @@ RUN apt-get update && apt-get upgrade -y && \
       curl \
       unzip \
       make \
-      openjdk-11-jdk \
+      openjdk-17-jdk \
       build-essential \
       software-properties-common \
       libpq-dev \

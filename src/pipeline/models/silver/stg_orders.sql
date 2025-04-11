@@ -1,8 +1,10 @@
 WITH order_profit AS (
     SELECT 
         oi.order_id,
-        SUM((oi.unit_price - oi.discount) * oi.quantity ) AS profit_per_order
+        SUM((oi.unit_price - p.product_price)* oi.quantity - oi.discount) AS profit_per_order
     FROM {{ ref('raw_order_items') }} oi
+        JOIN {{ ref('raw_products') }} p 
+        ON oi.product_id = p.product_id
     GROUP BY oi.order_id
 )
 SELECT 

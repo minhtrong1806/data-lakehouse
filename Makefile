@@ -1,4 +1,6 @@
 # DOCKER
+up-mini:
+	docker compose up -d minio postgres-catalog rest trino cube metabase
 
 up:
 	docker compose up -d
