@@ -3,7 +3,7 @@ up-mini:
 	docker compose up -d minio postgres-catalog rest trino cube metabase
 
 up:
-	docker compose up -d
+	docker compose up -d spark rest postgres-catalog trino minio metabase
 
 down: 
 	docker compose down -v

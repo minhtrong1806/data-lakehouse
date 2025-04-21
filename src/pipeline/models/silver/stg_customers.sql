@@ -11,7 +11,6 @@ SELECT
     REGEXP_REPLACE(LOWER(c.customer_lname), '(^|\s)(\w)', x -> UPPER(x[2])) AS customer_lname,
     c.customer_email,
     s.total_sales AS sales_per_customer,
-    'unknown' AS customer_segment  -- Sẽ được cập nhật sau bằng Python
 FROM {{ref('raw_customers')}} c
 LEFT JOIN sales s ON c.customer_id = s.order_customer_id
 WHERE c.customer_email IS NOT NULL AND c.customer_email <> ''

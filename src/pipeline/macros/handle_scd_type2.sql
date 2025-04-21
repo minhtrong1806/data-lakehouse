@@ -16,7 +16,7 @@
                 {{ attributes | join(', ') }},
                 effective_date,
                 expiration_date,
-                is_current
+                is_current 
             FROM {{ target_table }}
             WHERE is_current = 1
         ),
