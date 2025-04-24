@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: supply_chain
-    database: supply_chain  
+    database: supply_chain
     schema: sc             
     tables:
       - name: categories

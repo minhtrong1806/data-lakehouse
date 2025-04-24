@@ -8,3 +8,4 @@ trino
 prettytable
 awscliv2
 matplotlib
+geoip2

@@ -1,9 +1,9 @@
 # DOCKER
 up-mini:
-	docker compose up -d minio postgres-catalog rest trino cube metabase
+	docker compose up -d
 
 up:
-	docker compose up -d spark rest postgres-catalog trino minio metabase
+	docker compose up -d 
 
 down: 
 	docker compose down -v
