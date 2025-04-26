@@ -28,12 +28,8 @@ models:
         description: "Email khách hàng"
         tests:
           - unique
-      - name: customer_password
-        description: "Mật khẩu khách hàng (được mã hóa)"
       - name: sales_per_customer
         description: "Doanh thu trên khách hàng"
-      - name: customer_segment
-        description: "Phân khúc khách hàng, được thêm sau"
 
   - name: stg_stores
     description: "Danh sách cửa hàng"
@@ -68,7 +64,7 @@ models:
           - not_null
       - name: order_date
         description: "Ngày đặt hàng"
-      - name: order_customer_id
+      - name: customer_id
         description: "Mã khách hàng đặt hàng"
       - name: store_id
         description: "Mã cửa hàng thực hiện đơn hàng"
@@ -173,11 +169,15 @@ models:
           - unique
           - not_null
       - name: timestamp
-        description: "timestamp"
-      - name: ip
-        description: "Địa chỉ ip của client"
+        description: "Thời gian xảy ra sự kiện"
+      - name: department
+        description: "Phòng ban hoặc danh mục cấp cao của sản phẩm"
       - name: category
         description: "Phân loại sản phẩm được click"
       - name: product
         description: "Sản phẩm được click"
+      - name: add_to_cart
+        description: "Cho biết liệu sản phẩm có được thêm vào giỏ hàng hay không"
+      - name: country
+        description: "Quốc gia của người dùng thực hiện click"
       

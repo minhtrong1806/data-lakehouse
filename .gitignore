@@ -1,5 +1,6 @@
 .venv
 .env
+.roo
 volumes
 cube/conf
 metabase/conf
