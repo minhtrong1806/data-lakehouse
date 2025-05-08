@@ -35,8 +35,12 @@ models:
           - not_null
       - name: category_id
         description: "Mã danh mục"
+        tests:
+          - not_null
       - name: category_name
         description: "Tên danh mục"
+        tests:
+          - not_null
 
   - name: dim_customer
     description: "Bảng chiều thông tin khách hàng"
@@ -48,6 +52,8 @@ models:
           - not_null
       - name: customer_id
         description: "Mã khách hàng"
+        tests:
+          - not_null
       - name: customer_fname
         description: "Tên khách hàng"
       - name: customer_lname
@@ -71,28 +77,52 @@ models:
           - not_null
       - name: date
         description: "Ngày đầy đủ"
+        tests:
+          - not_null
       - name: year
         description: "Năm"
+        tests:
+          - not_null
       - name: quarter
         description: "Quý (1-4)"
+        tests:
+          - not_null
       - name: quarter_name
         description: "Tên quý (Q1-Q4)"
+        tests:
+          - not_null
       - name: month
         description: "Tháng (1-12)"
+        tests:
+          - not_null
       - name: month_name
         description: "Tên tháng"
+        tests:
+          - not_null
       - name: day
         description: "Ngày trong tháng (1-31)"
+        tests:
+          - not_null
       - name: day_of_week_number
         description: "Số thứ tự ngày trong tuần (1-7)"
+        tests:
+          - not_null
       - name: day_of_week_name
         description: "Tên ngày trong tuần"
+        tests:
+          - not_null
       - name: is_weekend
         description: "Có phải cuối tuần không (1: có, 0: không)"
+        tests:
+          - not_null
       - name: week_number
         description: "Số tuần trong năm"
+        tests:
+          - not_null
       - name: day_of_year
         description: "Ngày trong năm (1-365/366)"
+        tests:
+          - not_null
 
   - name: dim_delivery_status
     description: "Bảng chiều trạng thái giao hàng"
@@ -104,6 +134,8 @@ models:
           - not_null
       - name: delivery_status
         description: "Trạng thái giao hàng"
+        tests:
+          - not_null
 
   - name: dim_geography
     description: "Bảng chiều địa lý"
@@ -115,16 +147,28 @@ models:
           - not_null
       - name: geography_id
         description: "Mã định danh địa lý"
+        tests:
+          - not_null
       - name: city
         description: "Thành phố"
+        tests:
+          - not_null
       - name: state
         description: "Bang/Tỉnh"
+        tests:
+          - not_null
       - name: country
         description: "Quốc gia"
+        tests:
+          - not_null
       - name: region
         description: "Khu vực"
+        tests:
+          - not_null
       - name: market
         description: "Thị trường"
+        tests:
+          - not_null
 
   - name: dim_order_status
     description: "Bảng chiều trạng thái đơn hàng"
@@ -136,6 +180,8 @@ models:
           - not_null
       - name: order_status
         description: "Trạng thái đơn hàng"
+        tests:
+          - not_null
 
   - name: dim_payment_type
     description: "Bảng chiều loại thanh toán"
@@ -147,6 +193,8 @@ models:
           - not_null
       - name: payment_type
         description: "Loại thanh toán"
+        tests:
+          - not_null
 
   - name: dim_product
     description: "Bảng chiều sản phẩm"
@@ -158,14 +206,24 @@ models:
           - not_null
       - name: product_id
         description: "Mã sản phẩm"
+        tests:
+          - not_null
       - name: product_name
         description: "Tên sản phẩm"
+        tests:
+          - not_null
       - name: product_price
         description: "Giá gốc của sản phẩm"
+        tests:
+          - not_null
       - name: product_status
         description: "Trạng thái sản phẩm (0: còn hàng, 1: hết hàng)"
+        tests:
+          - not_null
       - name: category_id
         description: "Mã danh mục"
+        tests:
+          - not_null
       - name: product_image
         description: "Đường dẫn hình ảnh sản phẩm"
       - name: effective_date
@@ -183,6 +241,8 @@ models:
           - not_null
       - name: shipping_mode
         description: "Phương thức vận chuyển"
+        tests:
+          - not_null
 
   - name: dim_store
     description: "Bảng chiều cửa hàng"
@@ -194,20 +254,32 @@ models:
           - not_null
       - name: store_id
         description: "Mã cửa hàng"
+        tests:
+          - not_null
       - name: store_latitude
         description: "Vĩ độ của cửa hàng"
       - name: store_longitude
         description: "Kinh độ của cửa hàng"
       - name: store_street
         description: "Địa chỉ đường phố của cửa hàng"
+        tests:
+          - not_null
       - name: store_city
         description: "Thành phố của cửa hàng"
+        tests:
+          - not_null
       - name: store_state
         description: "Bang/Tỉnh của cửa hàng"
+        tests:
+          - not_null
       - name: store_zipcode
         description: "Mã bưu chính của cửa hàng"
+        tests:
+          - not_null
       - name: store_country
         description: "Quốc gia của cửa hàng"
+        tests:
+          - not_null
       - name: effective_date
         description: "Ngày hiệu lực của bản ghi"
       - name: expiration_date
@@ -223,54 +295,142 @@ models:
           - not_null
       - name: order_id
         description: "Mã đơn hàng"
+        tests:
+          - not_null
       - name: product_sk
         description: "Mã định danh sản phẩm"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_product')
+              field: product_sk
       - name: customer_sk
         description: "Mã định danh khách hàng"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_sk
       - name: store_sk
         description: "Mã định danh cửa hàng"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_store')
+              field: store_sk
       - name: order_date_key
         description: "Mã ngày đặt hàng (định dạng YYYYMMDD)"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
       - name: shipping_date_key
         description: "Mã ngày vận chuyển (định dạng YYYYMMDD)"
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
       - name: order_status_sk
         description: "Mã trạng thái đơn hàng"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_order_status')
+              field: order_status_sk
       - name: shipping_mode_sk
         description: "Mã phương thức vận chuyển"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_shipping_mode')
+              field: shipping_mode_sk
       - name: delivery_status_sk
         description: "Mã trạng thái giao hàng"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_delivery_status')
+              field: delivery_status_sk
       - name: payment_type_sk
         description: "Mã loại thanh toán"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_payment_type')
+              field: payment_type_sk
       - name: quantity
         description: "Số lượng sản phẩm trong đơn hàng"
+        tests:
+          - not_null
       - name: unit_price
         description: "Đơn giá của sản phẩm"
+        tests:
+          - not_null
       - name: discount
         description: "Giá trị chiết khấu áp dụng cho sản phẩm"
+        tests:
+          - not_null
       - name: total_price
         description: "Tổng giá trị đơn hàng sau chiết khấu"
+        tests:
+          - not_null
       - name: sales
         description: "Tổng doanh thu của đơn hàng"
+        tests:
+          - not_null
       - name: profit
         description: "Lợi nhuận từ đơn hàng"
+        tests:
+          - not_null
       - name: days_for_shipping_real
         description: "Số ngày thực tế để vận chuyển"
+        tests:
+          - not_null
       - name: days_for_shipment_scheduled
         description: "Số ngày dự kiến để vận chuyển"
+        tests:
+          - not_null
       - name: late_delivery_risk
         description: "Nguy cơ giao hàng trễ (1: có, 0: không)"
-- name: fact_clickstream
+        tests:
+          - not_null
+  - name: fact_clickstream
     description: "Bảng sự kiện clickstream"
     columns:
       - name: date_key
         description: "Mã ngày của sự kiện clickstream (định dạng YYYYMMDD)"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
       - name: geography_key
         description: "Mã định danh địa lý của sự kiện clickstream"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_geography')
+              field: geography_sk
       - name: category_key
         description: "Mã định danh danh mục của sự kiện clickstream"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_category')
+              field: category_sk
       - name: product_key
         description: "Mã định danh sản phẩm của sự kiện clickstream"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_product')
+              field: product_sk
       - name: total_events
         description: "Tổng số sự kiện clickstream"
+        tests:
+          - not_null
       - name: total_add_to_cart
         description: "Tổng số hành động thêm vào giỏ hàng"
+        tests:
+          - not_null

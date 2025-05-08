@@ -3,11 +3,17 @@
     incremental_strategy='append'
 ) }}
 
-WITH source AS (
-    SELECT * FROM {{ source('lakehouse', 'raw_clickstream') }}
+WITH max_ts AS (
     {% if is_incremental() %}
-    WHERE ts > (SELECT MAX(ts) FROM {{ this }}) -- Chỉ lấy dữ liệu mới
+    SELECT COALESCE(MAX(timestamp), TIMESTAMP '1970-01-01 00:00:00') AS max_timestamp
+    FROM {{ this }}
+    {% else %}
+    SELECT TIMESTAMP '1970-01-01 00:00:00' AS max_timestamp
     {% endif %}
+),
+source AS (
+    SELECT * FROM {{ source('lakehouse', 'raw_clickstream') }}
+    WHERE ts > (SELECT max_timestamp FROM max_ts) -- Chỉ lấy dữ liệu mới, sử dụng giá trị mặc định nếu không có dữ liệu
 )
 SELECT
     event_id, 

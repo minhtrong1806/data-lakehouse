@@ -1,16 +1,3 @@
-spark:
-  target: dev
-  outputs:
-    dev:
-      type: spark
-      method: thrift
-      host: spark
-      port: 10009
-      schema: bronze
-      connect_retries: 5
-      connect_timeout: 60
-      retry_all: true
-
 trino:
   target: dev
   outputs:
@@ -26,4 +13,18 @@ trino:
       session_properties:
         query_max_run_time: 5d
 
+analytics:
+  target: dev
+  outputs:
+    dev:
+      type: trino
+      user: admin
+      host: trino
+      port: 8060
+      database: analytics
+      schema: analytics
+      threads: 4
+      http_scheme: http
+      session_properties:
+        query_max_run_time: 5d
 
