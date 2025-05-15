@@ -146,5 +146,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+  cloudflared:
+      image: cloudflare/cloudflared:latest
+      command: tunnel --no-autoupdate run --token eyJhIjoiMzBiYzZlOTBjNTYyZWYyM2FlY2NjZTBkZTZhYzU4OTUiLCJ0IjoiZGY1NDRjYjQtNjI5ZS00ZDU1LWE1MWYtNTQzYjZlZjNlNzg4IiwicyI6Ik9ETXlOVGhpWWpjdE56azFNQzAwWW1aa0xUazVZakl0WXpobFlUUXpaakE1T1RjeiJ9
+
 
 
