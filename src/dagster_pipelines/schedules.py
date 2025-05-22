@@ -1,10 +1,5 @@
-"""
-Dagster schedule definitions for dbt and PySpark pipelines.
-This file defines the schedules for running dbt transformation, clickstream, and customer segmentation pipelines.
-"""
-
 from dagster import ScheduleDefinition
-from jobs import dbt_transformation_pipeline, dbt_clickstream_pipeline, customer_segmentation_pipeline
+from src.dagster_pipelines.jobs import dbt_transformation_pipeline, dbt_clickstream_pipeline, customer_segmentation_pipeline
 
 # Schedule for clickstream pipeline (dbt only) to run frequently due to streaming nature
 clickstream_schedule = ScheduleDefinition(

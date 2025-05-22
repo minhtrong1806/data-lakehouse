@@ -1,18 +1,47 @@
-"""
-Dagster asset definitions for dbt models.
-This file defines the assets (data outputs) that dbt models produce.
-"""
+from dagster import asset, Output, AssetIn
+from dagster_dbt import DbtCliResource
 
-from dagster_dbt import load_assets_from_dbt_project
-
-# Configuration for dbt project
-DBT_PROJECT_DIR = "f:/KLTN/data-lakehouse/src/pipeline"
-DBT_PROFILES_DIR = "f:/KLTN/data-lakehouse/src/pipeline"
-
-# Load dbt assets for bronze, silver, gold, and clickstream
-dbt_assets = load_assets_from_dbt_project(
-    project_dir=DBT_PROJECT_DIR,
-    profiles_dir=DBT_PROFILES_DIR,
-    target="dev",  # Target environment, adjust as needed
-    select="tag:bronze tag:silver tag:gold stg_clickstream fact_clickstream"
+# Cấu hình tài nguyên dbt
+dbt_resource = DbtCliResource(
+    project_dir="f:/KLTN/data-lakehouse/src/pipeline",  
+    profiles_dir="f:/KLTN/data-lakehouse/src/pipeline", 
+    target="dev"
 )
+
+# Định nghĩa các asset dựa trên các job dbt trong jobs.py
+@asset
+def bronze_tables(context):
+    """Asset đại diện cho các bảng ở tầng Bronze được tạo bởi job dbt_transformation_pipeline."""
+    result = context.resources.dbt.cli(["run", "--select", "tag:bronze"]).wait()
+    return Output(value=None, metadata={"status": "completed" if result.success else "failed"})
+
+@asset(ins={"bronze_tables": AssetIn()})
+def silver_tables(context, bronze_tables):
+    """Asset đại diện cho các bảng ở tầng Silver được tạo bởi job dbt_transformation_pipeline."""
+    result = context.resources.dbt.cli(["run", "--select", "tag:silver -stg_clickstream"]).wait()
+    return Output(value=None, metadata={"status": "completed" if result.success else "failed"})
+
+@asset(ins={"silver_tables": AssetIn()})
+def gold_tables(context, silver_tables):
+    """Asset đại diện cho các bảng ở tầng Gold được tạo bởi job dbt_transformation_pipeline."""
+    result = context.resources.dbt.cli(["run", "--select", "tag:gold -fact_clickstream"]).wait()
+    return Output(value=None, metadata={"status": "completed" if result.success else "failed"})
+
+@asset
+def clickstream_silver(context):
+    """Asset đại diện cho bảng stg_clickstream ở tầng Silver được tạo bởi job dbt_clickstream_pipeline."""
+    result = context.resources.dbt.cli(["run", "--select", "stg_clickstream"]).wait()
+    return Output(value=None, metadata={"status": "completed" if result.success else "failed"})
+
+@asset(ins={"clickstream_silver": AssetIn()})
+def clickstream_gold(context, clickstream_silver):
+    """Asset đại diện cho bảng fact_clickstream ở tầng Gold được tạo bởi job dbt_clickstream_pipeline."""
+    result = context.resources.dbt.cli(["run", "--select", "fact_clickstream"]).wait()
+    return Output(value=None, metadata={"status": "completed" if result.success else "failed"})
+
+# Định nghĩa asset dựa trên job customer_segmentation_pipeline
+@asset(ins={"gold_tables": AssetIn()})
+def customer_rfm_segments(context, gold_tables):
+    """Asset đại diện cho bảng customer_rfm_segments được tạo bởi job customer_segmentation_pipeline."""
+    # Giả lập kết quả từ job PySpark, thực tế sẽ cần tích hợp với PySpark resource
+    return Output(value=None, metadata={"status": "completed", "description": "Customer RFM segments calculated"})

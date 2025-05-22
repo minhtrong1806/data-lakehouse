@@ -3,7 +3,7 @@ up-mini:
 	docker compose up -d
 
 up:
-	docker compose up -d iceberg-rest trino minio metabase
+	docker compose up -d iceberg-rest trino minio metabase spark
 
 down: 
 	docker compose down -v
@@ -15,10 +15,10 @@ restore-db:
 
 # LOGS STREAMING
 reset-log:
-	docker exec -it spark /opt/spark/bin/spark-submit --master spark://spark:7077 /src/script/insert_logs_2017.py
+	docker exec -it spark /opt/spark/bin/spark-submit --master spark://spark:7077 /src/script/insert_logs.py
 
 start-stream:
-	cmd.exe /c start docker exec spark python /src/script/generate_logs_2018.py
+	cmd.exe /c start docker exec spark python /src/script/generate_logs.py
 	cmd.exe /c start docker exec spark python /src/script/streaming_logs.py
 
 stop-stream:

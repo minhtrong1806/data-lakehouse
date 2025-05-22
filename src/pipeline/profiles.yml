@@ -13,18 +13,4 @@ trino:
       session_properties:
         query_max_run_time: 5d
 
-analytics:
-  target: dev
-  outputs:
-    dev:
-      type: trino
-      user: admin
-      host: trino
-      port: 8060
-      database: analytics
-      schema: analytics
-      threads: 4
-      http_scheme: http
-      session_properties:
-        query_max_run_time: 5d
 

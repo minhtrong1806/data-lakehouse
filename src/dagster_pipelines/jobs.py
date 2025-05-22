@@ -1,10 +1,5 @@
-"""
-Dagster job definitions for orchestrating dbt models and PySpark jobs.
-This file defines the jobs to run dbt models and PySpark processing in sequence.
-"""
-
 from dagster import job, op
-from dagster_dbt import dbt_cli_resource, dbt_run_op
+from dagster_dbt import DbtCliResource
 from dagster_pyspark import pyspark_resource
 from src.script.customer_segment import (
     init_spark_session as customer_spark_init,
@@ -19,13 +14,14 @@ from src.script.customer_segment import (
 )
 
 # Configuration for dbt resource
-dbt_resource = dbt_cli_resource.configured({
-    "project_dir": "f:/KLTN/data-lakehouse/src/pipeline",  # Directory containing dbt project
-    "profiles_dir": "f:/KLTN/data-lakehouse/src/pipeline",  # Directory containing profiles.yml
-    "target": "dev"  # Target environment, adjust as needed
-})
+dbt_resource = DbtCliResource(
+    project_dir="f:/KLTN/data-lakehouse/src/pipeline",  
+    profiles_dir="f:/KLTN/data-lakehouse/src/pipeline", 
+    # project_dir="/src/pipeline",  # Directory containing dbt project
+    # profiles_dir="/src/pipeline",  # Directory containing profiles.yml
+    target="dev"
+)
 
-# Configuration for PySpark resource
 spark_resource = pyspark_resource.configured({
     "spark_conf": {
         "spark.master": "local[*]",  # Can be adjusted for cluster mode
@@ -33,45 +29,42 @@ spark_resource = pyspark_resource.configured({
     }
 })
 
-# Define dbt run operations for each layer
-dbt_run_bronze = dbt_run_op.configured(
-    {"select": "tag:bronze"},
-    name="run_dbt_bronze"
-)
 
-dbt_run_silver = dbt_run_op.configured(
-    {"select": "tag:silver -stg_clickstream"},
-    name="run_dbt_silver"
-)
+@op(required_resource_keys={"dbt"})
+def run_dbt_bronze(context):
+    context.resources.dbt.cli(["run", "--select", "tag:bronze"])
 
-dbt_run_gold = dbt_run_op.configured(
-    {"select": "tag:gold -fact_clickstream"},
-    name="run_dbt_gold"
-)
+@op(required_resource_keys={"dbt"})
+def run_dbt_silver(context):
+    context.resources.dbt.cli(["run", "--select", "tag:silver -stg_clickstream"])
 
-dbt_run_clickstream_silver = dbt_run_op.configured(
-    {"select": "stg_clickstream"},
-    name="run_dbt_clickstream_silver"
-)
+@op(required_resource_keys={"dbt"})
+def run_dbt_gold(context):
+    context.resources.dbt.cli(["run", "--select", "tag:gold -fact_clickstream"])
 
-dbt_run_clickstream_gold = dbt_run_op.configured(
-    {"select": "fact_clickstream"},
-    name="run_dbt_clickstream_gold"
-)
+@op(required_resource_keys={"dbt"})
+def run_dbt_clickstream_silver(context):
+    context.resources.dbt.cli(["run", "--select", "stg_clickstream"])
+
+@op(required_resource_keys={"dbt"})
+def run_dbt_clickstream_gold(context):
+    context.resources.dbt.cli(["run", "--select", "fact_clickstream"])
 
 # Define PySpark operations for customer segmentation
 @op(required_resource_keys={"pyspark"})
 def initialize_customer_spark(context):
-    spark = context.resources.pyspark.spark_session
-    return spark
+    # Không trả về SparkSession vì nó không thể được serialize
+    return "Spark session initialized"
 
-@op
-def run_customer_segmentation(spark):
+@op(required_resource_keys={"pyspark"})
+def run_customer_segmentation(context):
+    spark = context.resources.pyspark.spark_session
     config = {
         "app_name": "PredictCustomerSegmentation",
-        "model_path": "/src/models/kmeans_rfm_model",
-        "analysis_date": "2018-01-31",
-        "analysis_timestamp": "2018-01-31 23:38:00.000",
+        # "model_path": "/src/models/kmeans_rfm_model",
+        "model_path": "f:/KLTN/data-lakehouse/src/models/kmeans_rfm_model",
+        "analysis_date": "2017-09-30",
+        "analysis_timestamp": "2017-09-30 23:38:00.000",
         "table_names": {
             "fact_sales": "lakehouse.gold.fact_sales",
             "dim_customer": "lakehouse.gold.dim_customer"
@@ -88,32 +81,23 @@ def run_customer_segmentation(spark):
     apply_scd_type2(spark, prediction_df, config["output_table"], config["analysis_timestamp"])
     return "Customer segmentation completed"
 
-# Define a job to run dbt models in sequence for non-streaming data
 @job(resource_defs={"dbt": dbt_resource})
 def dbt_transformation_pipeline():
-    """
-    A Dagster job to run dbt models for data transformation.
-    Executes bronze, silver, and gold layer models in sequence for non-streaming data.
-    """
-    bronze_result = dbt_run_bronze()
-    silver_result = dbt_run_silver.after(bronze_result)
-    dbt_run_gold.after(silver_result)
 
-# Define a separate job for clickstream streaming data (dbt)
+    run_dbt_bronze()
+    run_dbt_silver()
+    run_dbt_gold()
+
+
 @job(resource_defs={"dbt": dbt_resource})
 def dbt_clickstream_pipeline():
-    """
-    A Dagster job to run dbt models specifically for clickstream streaming data.
-    Executes stg_clickstream (silver) and fact_clickstream (gold) in sequence.
-    """
-    silver_result = dbt_run_clickstream_silver()
-    dbt_run_clickstream_gold.after(silver_result)
 
-# Define a job for customer segmentation using PySpark
+    run_dbt_clickstream_silver()
+    run_dbt_clickstream_gold()
+
+
 @job(resource_defs={"pyspark": spark_resource})
 def customer_segmentation_pipeline():
-    """
-    A Dagster job to run PySpark processing for customer segmentation based on RFM metrics.
-    """
-    spark = initialize_customer_spark()
-    run_customer_segmentation(spark)
+
+    initialize_customer_spark()
+    run_customer_segmentation()

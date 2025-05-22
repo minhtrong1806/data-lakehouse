@@ -21,7 +21,7 @@ source AS (
         product,
         add_to_cart,
         country
-    FROM {{ source('silver', 'stg_clickstream') }}
+    FROM {{ ref('stg_clickstream') }}
     WHERE DATE(timestamp) > (SELECT max_ts FROM max_ts)
 ),
 
@@ -40,17 +40,17 @@ clickstream_data AS (
 
 dim_date AS (
     SELECT date_key, date
-    FROM {{ source('gold', 'dim_date') }}
+    FROM {{ ref('dim_date') }}
 ),
 
 dim_category AS (
     SELECT category_sk, category_name
-    FROM {{ source('gold', 'dim_category') }}
+    FROM {{ ref('dim_category') }}
 ),
 
 dim_product AS (
     SELECT product_sk, product_name
-    FROM {{ source('gold', 'dim_product') }}
+    FROM {{ ref('dim_product') }}
 )
 
 SELECT 
