@@ -4,6 +4,10 @@
 volumes
 cube/conf
 metabase/conf
-spark-iceberg/bin/*.tgz
-spark-iceberg/jars/*.jar
+*.tgz
+*.jar
 src/logs
+*.log
+src/notebooks/.ipynb_checkpoints
+*/_pycaches_
+*.tmp*

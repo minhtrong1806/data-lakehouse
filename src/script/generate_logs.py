@@ -34,14 +34,12 @@ def create_topic():
         admin_client.close()
 
 def init_producer():
-    """Khởi tạo Kafka Producer với JSON serializer."""
     return KafkaProducer(
         bootstrap_servers=BOOTSTRAP_SERVERS,
         value_serializer=lambda v: json.dumps(v).encode("utf-8")  # Serialize JSON đúng chuẩn
     )
 
 def init_consumer():
-    """Khởi tạo Kafka Consumer để lấy event_id từ Kafka."""
     def safe_json_deserializer(message):
         try:
             return json.loads(message.decode("utf-8"))
@@ -58,12 +56,11 @@ def init_consumer():
     )
 
 def get_existing_event_ids():
-    """Lấy event_id từ bảng raw_clickstream trong năm 2018."""
     logging.info("Đang lấy danh sách event_id từ Trino...")
     conn = connect(
         host=TRINO_HOST,
         port=TRINO_PORT,
-        user='admin',  # Trino yêu cầu user, có thể là 'admin'
+        user='admin', 
         catalog=TRINO_CATALOG,
         schema=TRINO_SCHEMA
     )
@@ -83,7 +80,6 @@ def get_existing_event_ids():
     return existing_event_ids
 
 def get_sent_event_ids():
-    """Lấy event_id của những message đã gửi lên Kafka."""
     logging.info("Đang lấy danh sách event_id từ Kafka...")
     consumer = init_consumer()
     sent_event_ids = set()
@@ -104,7 +100,6 @@ def get_sent_event_ids():
 
 
 def send_messages(producer):
-    """Đọc dữ liệu từ CSV và gửi lên Kafka sau khi loại bỏ các event_id đã tồn tại."""
     existing_event_ids = get_existing_event_ids()
     sent_event_ids = get_sent_event_ids()
 
@@ -116,18 +111,15 @@ def send_messages(producer):
             try:
                 current_time = datetime.strptime(row[TIMESTAMP_COL], TIME_FORMAT)
                 
-                # Kiểm tra nếu event_id đã tồn tại thì bỏ qua
                 event_id = row["event_id"]
                 if event_id in existing_event_ids or event_id in sent_event_ids:
                     continue
                 
-                # Delay
                 if prev_time is not None:
                     delay = (current_time - prev_time).total_seconds() * 0.1
                     if delay > 0:
                         time.sleep(delay)
                 
-                # Gửi message
                 producer.send(TOPIC_NAME, value=row)
                 logging.info(f"Đã gửi record: {row}")
                 

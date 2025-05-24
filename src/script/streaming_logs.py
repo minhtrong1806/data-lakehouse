@@ -7,12 +7,10 @@ from pyspark.sql.utils import AnalysisException
 import geoip2.database
 import pandas as pd
 import os
-# Đường dẫn đến database GeoLite2
 GEOIP_DB_PATH = "/src/data/GeoLite2-Country.mmdb"
 
 @pandas_udf(StringType())
 def get_country_udf(ip_series: pd.Series) -> pd.Series:
-    """Hàm pandas UDF lấy tên quốc gia từ địa chỉ IP"""
     reader = geoip2.database.Reader(GEOIP_DB_PATH)
     results = []
 
@@ -27,16 +25,13 @@ def get_country_udf(ip_series: pd.Series) -> pd.Series:
     return pd.Series(results)
 
 
-# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("ClickstreamConsumer")
 
 def create_spark_session():
-    """Tạo SparkSession với cấu hình cần thiết"""
     return SparkSession.builder.appName("ClickstreamConsumer").getOrCreate()
 
 def define_schema():
-    """Định nghĩa schema cho dữ liệu clickstream"""
     return StructType([
         StructField("event_id", StringType(), True),
         StructField("ts", TimestampType(), True),
@@ -45,9 +40,8 @@ def define_schema():
     ])
 
 def read_from_kafka(spark, topic):
-    """Đọc dữ liệu từ Kafka topic, chờ nếu topic chưa tồn tại"""
-    max_retries = 10  # Số lần thử kết nối tối đa
-    retry_interval = 10  # Khoảng thời gian giữa các lần thử (giây)
+    max_retries = 10  
+    retry_interval = 10  
     attempt = 0
     
     while attempt < max_retries:
@@ -73,10 +67,8 @@ def read_from_kafka(spark, topic):
     raise RuntimeError("Kafka topic không khả dụng")
 
 def process_stream(df):
-    """Chuyển đổi dữ liệu Kafka thành DataFrame và phân tích URL"""
     logger.info("Đang chuyển đổi và phân tích dữ liệu từ Kafka")
 
-    # Parse URL và thêm các trường
     parsed_df = df.selectExpr("CAST(value AS STRING)") \
         .select(from_json(col("value"), define_schema()).alias("data")) \
         .select("data.*") \
@@ -90,10 +82,8 @@ def process_stream(df):
     return parsed_df
 
 def write_to_iceberg(df, table_name, checkpoint_path):
-    """Ghi dữ liệu vào Iceberg table với kiểm tra tránh chạy trùng job"""
     logger.info(f"Bắt đầu ghi dữ liệu vào {table_name}")
     
-    # Định danh duy nhất cho job tránh chạy trùng
     query_name = "clickstream_query"
     return df.writeStream \
         .format("iceberg") \

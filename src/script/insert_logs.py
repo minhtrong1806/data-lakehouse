@@ -5,12 +5,10 @@ from pyspark.sql.types import StringType
 import geoip2.database
 import pandas as pd
 
-# Đường dẫn đến database GeoLite2
 GEOIP_DB_PATH = "/src/data/GeoLite2-Country.mmdb"
 
 @pandas_udf(StringType())
 def get_country_udf(ip_series: pd.Series) -> pd.Series:
-    """Hàm pandas UDF lấy tên quốc gia từ địa chỉ IP"""
     reader = geoip2.database.Reader(GEOIP_DB_PATH)
     results = []
 
@@ -24,7 +22,6 @@ def get_country_udf(ip_series: pd.Series) -> pd.Series:
     reader.close()
     return pd.Series(results)
 
-# Thiết lập logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("SparkJob")
 
@@ -53,7 +50,6 @@ def create_bronze_table(spark):
 
 
 def parse_clickstream(df):
-    """Phân tích URL thành các thành phần cấu trúc"""
     return df.withColumn("url", url_decode(col("url"))) \
             .withColumn("department", regexp_extract(col("url"), r"/department/([^/]+)", 1)) \
             .withColumn("category", regexp_extract(col("url"), r"/category/([^/]+)", 1)) \

@@ -2,7 +2,6 @@ from dagster import ScheduleDefinition
 from dagster_dbt import build_schedule_from_dbt_selection
 from .assets import pipeline_dbt_assets, customer_segmentation_asset
 
-# Schedule for clickstream pipeline to run frequently due to streaming nature
 clickstream_schedule = build_schedule_from_dbt_selection(
     [pipeline_dbt_assets],
     job_name="materialize_dbt_clickstream",
@@ -11,7 +10,6 @@ clickstream_schedule = build_schedule_from_dbt_selection(
     execution_timezone="Asia/Saigon"
 )
 
-# Schedule for regular transformation pipeline (dbt, non-streaming) to run daily
 transformation_schedule = build_schedule_from_dbt_selection(
     [pipeline_dbt_assets],
     job_name="materialize_dbt_transformation",
@@ -20,7 +18,6 @@ transformation_schedule = build_schedule_from_dbt_selection(
     execution_timezone="Asia/Saigon"
 )
 
-# Schedule for customer segmentation pipeline to run weekly
 customer_segmentation_schedule = ScheduleDefinition(
     job_name="customer_segmentation_job",
     cron_schedule="0 3 * * 0",  # Runs every Sunday at 3 AM

@@ -69,6 +69,7 @@ services:
       - ./src:/src
       - ./spark-iceberg/conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./spark-iceberg/conf/log4j2.properties:/opt/spark/conf/log4j2.properties
+      - ./volumes/dagster_data:/opt/dagster
     ports:
       - 8888:8888 # Spark notebook port
       - 7077:7077 # Spark port
@@ -78,6 +79,7 @@ services:
       - 10009:10009 # Kyuubi JDBC port
       - 18080:18080 # Spark history web ui port
       - 9083:9083 # Metastore thrift
+      - 3000:3000
 
   kafka:
     image: bitnami/kafka:latest
@@ -149,6 +151,4 @@ services:
   cloudflared:
       image: cloudflare/cloudflared:latest
       command: tunnel --no-autoupdate run --token eyJhIjoiMzBiYzZlOTBjNTYyZWYyM2FlY2NjZTBkZTZhYzU4OTUiLCJ0IjoiZGY1NDRjYjQtNjI5ZS00ZDU1LWE1MWYtNTQzYjZlZjNlNzg4IiwicyI6Ik9ETXlOVGhpWWpjdE56azFNQzAwWW1aa0xUazVZakl0WXpobFlUUXpaakE1T1RjeiJ9
-
-
 

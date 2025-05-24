@@ -3,7 +3,7 @@ up-mini:
 	docker compose up -d
 
 up:
-	docker compose up -d iceberg-rest trino minio metabase spark
+	docker compose up -d 
 
 down: 
 	docker compose down -v

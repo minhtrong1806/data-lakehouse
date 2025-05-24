@@ -6,6 +6,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname=postgres <<-EOSQL
     CREATE DATABASE metabase_db;
     CREATE DATABASE rest_db;
     CREATE DATABASE analytics;
+    CREATE DATABASE datahub_db;
 EOSQL
 
 # Kiểm tra nếu supply_chain_db chưa có bảng nào thì mới restore
