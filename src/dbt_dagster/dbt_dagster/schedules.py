@@ -21,8 +21,7 @@ transformation_schedule = build_schedule_from_dbt_selection(
 customer_segmentation_schedule = ScheduleDefinition(
     job_name="customer_segmentation_job",
     cron_schedule="0 3 * * 0",  # Runs every Sunday at 3 AM
-    execution_timezone="Asia/Saigon",
-    run_config={"assets": {"customer_segmentation_asset": {}}}
+    execution_timezone="Asia/Saigon"
 )
 
 schedules = [

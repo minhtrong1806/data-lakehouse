@@ -7,9 +7,9 @@ from .project import pipeline_project
 
 @dbt_assets(manifest=pipeline_project.manifest_path)
 def pipeline_dbt_assets(context: AssetExecutionContext, dbt: DbtCliResource):
-    # Chạy dbt theo thứ tự bronze, silver, gold
-    context.log.info("Chạy dbt cho tất cả các layer")
-    yield from dbt.cli(["run", "--select", "tag:bronze tag:silver tag:gold"], context=context).stream()
+    # Chạy dbt theo thứ tự bronze, silver, gold với các tag và sử dụng macro generate_schema_name
+    context.log.info("Chạy dbt cho tất cả các layer với schema tùy chỉnh")
+    yield from dbt.cli(["run", "--select", "tag:bronze tag:silver tag:gold", "--vars", "{'database': 'lakehouse'}"], context=context).stream()
 
 import traceback
 

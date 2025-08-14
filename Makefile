@@ -1,6 +1,6 @@
 # DOCKER
 up-mini:
-	docker compose up -d
+	docker compose up -d   trino postgres iceberg-rest minio metabase cloudflared
 
 up:
 	docker compose up -d 
@@ -22,7 +22,9 @@ start-stream:
 	cmd.exe /c start docker exec spark python /src/script/streaming_logs.py
 
 stop-stream:
-	docker exec -it spark pkill -9 python
+	docker exec spark pkill -f generate_logs.py
+	docker exec spark pkill -f streaming_logs.py
+
 
 
 # DBT
