@@ -1,10 +1,16 @@
 jupyter
 jupysql
 pyiceberg[pyarrow,pandas]==0.9.0
-dbt-trino==1.9.0
+dbt-trino==1.9.1
+dagster==1.10.15
+dagster-webserver==1.10.15
+dagster-dbt==0.26.15
+dagster-pyspark==0.26.15
 pyspark==3.5.5
 kafka-python
 trino
 prettytable
 awscliv2
 matplotlib
+geoip2
+plotly

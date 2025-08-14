@@ -8,6 +8,7 @@ ENV AWSSDK_VERSION=2.20.18
 
 # Optional path env variables
 ENV SPARK_HOME=/opt/spark
+ENV DAGSTER_HOME=/opt/dagster
 ENV BIN_DIR=/usr/bin
 ENV DBT_DIR=/src/dbt
 ENV NOTEBOOKS_DIR=/src/notebooks
@@ -19,7 +20,7 @@ ENV PATH="/opt/spark/sbin:/opt/spark/bin:${PATH}"
 ENV INSTALL_DIR=/tmp/install
 
 # Create dirs
-RUN mkdir -p ${SPARK_HOME} ${DBT_DIR} ${NOTEBOOKS_DIR} \
+RUN mkdir -p ${SPARK_HOME} ${DBT_DIR} ${NOTEBOOKS_DIR} ${DAGSTER_HOME}\
              ${SPARK_EVENTS_DIR} ${INSTALL_DIR} \
             /root/.ipython/profile_default/startup
 
@@ -30,7 +31,7 @@ RUN apt-get update && apt-get upgrade -y && \
       curl \
       unzip \
       make \
-      openjdk-11-jdk \
+      openjdk-17-jdk \
       build-essential \
       software-properties-common \
       libpq-dev \
@@ -94,6 +95,7 @@ EXPOSE 8062
 EXPOSE 10000
 EXPOSE 10009
 EXPOSE 18080  
+EXPOSE 3000  
 
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 CMD ["notebook"]

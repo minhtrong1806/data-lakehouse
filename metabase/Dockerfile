@@ -6,11 +6,8 @@ FROM openjdk:21-slim-bullseye
 
 ENV FC_LANG en-US LC_CTYPE en_US.UTF-8
 
-ENV MB_DB_FILE="/conf/metabase.db" \
-    MB_DB_HOST="0.0.0.0" \
-    MB_JETTY_PORT="3030" \
-    MB_DB_TYPE="h2" \
-    MB_PLUGINS_DIR="/plugins"
+ENV MB_PLUGINS_DIR="/plugins" \ 
+    MB_JETTY_PORT="3030" 
 
 # dependencies
 RUN mkdir -p ${MB_PLUGINS_DIR} && chmod a+rwx ${MB_PLUGINS_DIR} && \
